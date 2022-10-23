@@ -1,0 +1,298 @@
+from mysql.connector import *
+from tkinter import *
+from random import *
+import os
+def createschedule():
+    a=connect(host='localhost',user='root',passwd='bvb@123')
+    c=a.cursor()
+    c.execute('create database sanskar_train_cs')
+    c.execute('use sanskar_train_cs')
+    c.execute('create table schedule(name varchar(100),number int,begin varchar(20),end varchar(20))')
+    c.execute("insert into schedule values('AZ EXPRESS', 10001, 'A', 'Z')")
+    c.execute("insert into schedule values('PQ EXPRESS', 10002, 'P', 'Q')")
+    c.execute("insert into schedule values('BT EXPRESS', 10003, 'B', 'T')")
+    c.execute("insert into schedule values('AH EXPRESS', 10004, 'A', 'H')")
+    c.execute("insert into schedule values('JO EXPRESS', 10005, 'J', 'O')")
+    c.execute("insert into schedule values('SY EXPRESS', 10006, 'S', 'Y')")
+    c.execute("insert into schedule values('BM EXPRESS', 10007, 'B', 'M')")
+    c.execute("insert into schedule values('EQ EXPRESS', 10008, 'E', 'Q')")
+    c.execute("insert into schedule values('FX EXPRESS', 10009, 'F', 'X')")
+    c.execute("insert into schedule values('QZ EXPRESS', 10010, 'Q', 'Z')")
+    c.execute('create table alltickets(pssng_dtls varchar(10000),trn_no int,pnr int)')
+    c.execute('create table pnr(pnrno int)')
+    a.commit()
+def stationsearch():
+    win.destroy()
+    def submit():
+        fg=f.get()
+        tg=t.get()
+        win1.destroy()
+        a=connect(host='localhost',user='root',passwd='bvb@123',database='sanskar_train_cs')
+        c=a.cursor()
+        c.execute('select * from schedule')
+        l=[]
+        ok=[]
+        for i in c:
+            l.append(i)
+        stations='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        for i in l:
+            if fg in stations[stations.index(i[2]):] and tg in stations[stations.index(i[2]):stations.index(i[3])+1]:
+                ok.append(i)
+        win2=Tk()
+        win2.title('RAIL SEVA')
+        win2.attributes('-fullscreen',True)
+        win2['bg']='yellow'
+        if ok!=[]:
+            lab='THE FOLLOWING TRAINS WERE FOUND : \n'
+            for i in ok:
+                lab+=str(i)+'\n'
+        else:
+            lab='NO TRAINS FOUND '
+        Label(win2,text=lab[:-1],fg='blue',font=('Arial',25)).pack(pady=25)
+        Button(win2,text='OK',fg='green',font=('Arial',25),command=win2.destroy).pack(pady=25)
+        Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+    win1=Tk()
+    win1.title('RAIL SEVA')
+    win1.attributes('-fullscreen',True)
+    win1['bg']='yellow'
+    f=StringVar()
+    t=StringVar()
+    Label(win1,text='ENTER STARTING POINT : ',fg='blue',font=('Arial',25)).pack(pady=25)
+    Entry(win1,textvariable=f,fg='purple',font=('Arial',25)).pack(pady=25)
+    Label(win1,text='ENTER ENDING POINT : ',fg='blue',font=('Arial',25)).pack(pady=25)
+    Entry(win1,textvariable=t,fg='purple',font=('Arial',25)).pack(pady=25)
+    Button(win1,text='SEARCH',command=submit,fg='green',font=('Arial',25)).pack(pady=10)
+    Button(win1,text='EXIT',command=win1.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+    win1.mainloop()
+def bookticket():
+    def submit():
+        t=int(trn.get())
+        win1.destroy()
+        a=connect(host='localhost',user='root',passwd='bvb@123',database='sanskar_train_cs')
+        c=a.cursor()
+        c.execute('select * from schedule')
+        l=[]
+        l_no=[]
+        for i in c:
+            l.append(i)
+            l_no.append(i[1])
+        if t not in l_no:
+            win2=Tk()
+            win2.title('RAIL SEVA')
+            win2.attributes('-fullscreen',True)
+            win2['bg']='yellow'
+            Label(win2,text='TRAIN NUMBER NOT VALID',fg='blue',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='OK',command=win2.destroy,fg='green',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+        else:
+            def submits():
+                ft=fg.get()
+                tt=tg.get()
+                main=l[l_no.index(t)]
+                stations='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                if ft not in stations[stations.index(main[2]):] and tt not in stations[stations.index(main[2]):stations.index(main[3])]:
+                    Label(win2,text='TRAIN NUMBER OR STATION NOT VALID\nTRY AGAIN',fg='blue',font=('Arial',25)).pack(pady=25)
+                    Button(win2,text='OK',command=win2.destroy,fg='green',font=('Arial',25)).pack(pady=25)
+                    Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+                else:
+                    win2.destroy()
+                    win3=Tk()
+                    win3.title('RAIL SEVA')
+                    win3.attributes('-fullscreen',True)
+                    win3['bg']='yellow'
+                    name=StringVar()
+                    age=StringVar()
+                    mobile=StringVar()
+                    email=StringVar()
+                    data_of_passengers=[]
+                    def done():
+                        d={}
+                        d['name']=name.get()
+                        d['age']=age.get()
+                        d['mobile']=mobile.get()
+                        d['email']=email.get()
+                        data_of_passengers.append(d)
+                        name.set('')
+                        age.set('')
+                        mobile.set('')
+                        email.set('')
+                    def alldone():
+                        win3.destroy()
+                        win4=Tk()
+                        win4.title('RAIL SEVA')
+                        win4.attributes('-fullscreen',True)
+                        win4['bg']='yellow'
+                        a=connect(host='localhost',user='root',passwd='bvb@123',database='sanskar_train_cs')
+                        c=a.cursor()
+                        c.execute('select * from pnr')
+                        pnrs=[]
+                        for i in c:
+                            pnrs.append(i)
+                        pnr_s=randint(10000,99999)
+                        while pnr_s in pnrs:
+                            pnr_s=randint(10000,99999)
+                        pnr_s=str(pnr_s)
+                        file=open(pnr_s+'.txt','w')
+                        content='THIS IS COMPUTER GENERATED TICKET\nNO SIGNATURE IS REQUIRED\nDATA OF PASSENGERS : \n'
+                        for i in data_of_passengers:
+                            content+=str(i)+'\n'
+                        content+='PNR NUMBER : '+str(pnr_s)+'\n'
+                        content+='TRAIN NUMBER : '+str(t)+'\n'
+                        content+='FROM : '+str(ft)+'\n'
+                        content+='TO : '+str(tt)
+                        file.write(content)
+                        file.close()
+                        c.execute('insert into alltickets values('+'"'+content+'",'+str(t)+','+str(pnr_s)+')')
+                        c.execute('insert into pnr values('+str(pnr_s)+')')
+                        a.commit()
+                        Label(win4,text='TICKET SAVED ON DESKTOP',fg='blue',font=('Arial',25)).pack(pady=25)
+                        Button(win4,text='OK',fg='green',font=('Arial',25),command=win4.destroy).pack(pady=25)
+                    Label(win3,text='NAME : ',fg='blue',font=('Arial',20)).pack(pady=20)
+                    Entry(win3,textvariable=name,fg='purple',font=('Arial',15)).pack(pady=20)
+                    Label(win3,text='AGE : ',fg='blue',font=('Arial',20)).pack(pady=20)
+                    Entry(win3,textvariable=age,fg='purple',font=('Arial',15)).pack(pady=20)
+                    Label(win3,text='MOBILE : ',fg='blue',font=('Arial',20)).pack(pady=20)
+                    Entry(win3,textvariable=mobile,fg='purple',font=('Arial',15)).pack(pady=20)
+                    Label(win3,text='EMAIL : ',fg='blue',font=('Arial',20)).pack(pady=20)
+                    Entry(win3,textvariable=email,fg='purple',font=('Arial',15)).pack(pady=20)
+                    Button(win3,text='DONE',fg='green',font=('Arial',20),command=done).pack(pady=20)
+                    Button(win3,text='DATA OF ALL PASSENGERS ENTERED',fg='green',font=('Arial',20),command=alldone).pack(pady=20)
+            win2=Tk()
+            win2.title('RAIL SEVA')
+            win2.attributes('-fullscreen',True)
+            win2['bg']='yellow'
+            Label(win2,text='FROM : ',fg='blue',font=('Arial',25)).pack(pady=25)
+            fg=StringVar()
+            Entry(win2,textvariable=fg,fg='purple',font=('Arial',25)).pack(pady=25)
+            Label(win2,text='TO : ',fg='blue',font=('Arial',25)).pack(pady=25)
+            tg=StringVar()
+            Entry(win2,textvariable=tg,fg='purple',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='SUBMIT',command=submits,fg='green',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+    win.destroy()
+    win1=Tk()
+    win1.title('RAIL SEVA')
+    win1.attributes('-fullscreen',True)
+    win1['bg']='yellow'
+    Label(win1,text='ENTER VALID TRAIN NUMBER : ',fg='blue',font=('Arial',25)).pack(pady=25)
+    trn=StringVar()
+    Entry(win1,textvariable=trn,fg='purple',font=('Arial',25)).pack(pady=25)
+    Button(win1,text='SUBMIT',command=submit,fg='green',font=('Arial',25)).pack(pady=25)
+    Button(win1,text='EXIT',command=win1.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+def pnrstatus():
+    a=connect(host='localhost',user='root',passwd='bvb@123',database='sanskar_train_cs')
+    c=a.cursor()
+    c.execute('select * from pnr')
+    l=[]
+    for i in c:
+        l.append(i[0])
+    win.destroy()
+    win1=Tk()
+    win1.title('RAIL SEVA')
+    win1.attributes('-fullscreen',True)
+    win1['bg']='yellow'
+    p=StringVar()
+    def submit():
+        try:
+            pn=int(p.get())
+        except:
+            pn=0
+        win1.destroy()
+        win2=Tk()
+        win2.title('RAIL SEVA')
+        win2.attributes('-fullscreen',True)
+        win2['bg']='yellow'
+        if pn not in l:
+            Label(win2,text='PNR NOT FOUND',fg='blue',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+        else:
+            pnew=pn
+            def download():
+                win2.destroy()
+                a1=connect(host='localhost',user='root',passwd='bvb@123',database='sanskar_train_cs')
+                c1=a1.cursor()
+                c1.execute('select * from alltickets where pnr='+str(pnew))
+                l=[]
+                for i in c1:
+                    l=list(i)
+                main=l[0]
+                name=str(l[2])
+                file=open(name+'.txt','w')
+                file.write(main)
+                file.close()
+                win3=Tk()
+                win3.title('RAIL SEVA')
+                win3.attributes('-fullscreen',True)
+                win3['bg']='yellow'
+                Label(win3,text='TICKET SAVED ON DESKTOP',fg='blue',font=('Arial',25)).pack(pady=25)
+                Button(win3,text='EXIT',command=win3.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+            Label(win2,text='PNR FOUND',fg='blue',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='DOWNLOAD TICKET',command=download,fg='green',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+    Label(win1,text='ENTER PNR NUMBER : ',fg='blue',font=('Arial',25)).pack(pady=25)
+    Entry(win1,textvariable=p,fg='purple',font=('Arial',25)).pack(pady=25)
+    Button(win1,text='SUBMIT',command=submit,fg='green',font=('Arial',25)).pack(pady=25)
+    Button(win1,text='EXIT',command=win1.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+def cancelbkng():
+    def submit():
+        win1.destroy()
+        try:
+            pn=int(p.get())
+        except:
+            pn=0
+        if pn not in l:
+            win2=Tk()
+            win2.title('RAIL SEVA')
+            win2.attributes('-fullscreen',True)
+            win2['bg']='yellow'
+            Label(win2,text='PNR NOT FOUND',fg='blue',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+        else:
+            win2=Tk()
+            win2.title('RAIL SEVA')
+            win2.attributes('-fullscreen',True)
+            win2['bg']='yellow'
+            a1=connect(host='localhost',user='root',passwd='bvb@123',database='sanskar_train_cs')
+            c1=a1.cursor()
+            c1.execute('delete from pnr where pnrno='+str(pn))
+            c1.execute('delete from alltickets where pnr='+str(pn))
+            a1.commit()
+            try:
+                os.remove(str(pn)+'.txt')
+            except:
+                pass
+            Label(win2,text='BOOKING CANCELLED SUCCESSFULLY',fg='blue',font=('Arial',25)).pack(pady=25)
+            Button(win2,text='EXIT',command=win2.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+    a=connect(host='localhost',user='root',passwd='bvb@123',database='sanskar_train_cs')
+    c=a.cursor()
+    c.execute('select * from pnr')
+    l=[]
+    for i in c:
+        l.append(i[0])
+    win.destroy()
+    win1=Tk()
+    win1.title('RAIL SEVA')
+    win1.attributes('-fullscreen',True)
+    win1['bg']='yellow'
+    p=StringVar()
+    Label(win1,text='ENTER PNR NUMBER : ',fg='blue',font=('Arial',25)).pack(pady=25)
+    Entry(win1,textvariable=p,fg='purple',font=('Arial',25)).pack(pady=25)
+    Button(win1,text='SUBMIT',command=submit,fg='green',font=('Arial',25)).pack(pady=25)
+    Button(win1,text='EXIT',command=win1.destroy,fg='red',font=('Arial',25)).pack(pady=25)
+win=Tk()
+win.title('RAIL SEVA')
+win.attributes('-fullscreen',True)
+win['bg']='yellow'
+one=Label(win,text='USE OUR SOFTWARE TO BOOK RAIL TICKETS, SEARCH TRAINS, \nCHECK PNR STATUS AND MUCH MORE.',fg='blue',font=('Arial',25))
+one.pack(pady=25)
+two=Button(win,text='SEARCH TRAINS BY STATION',command=stationsearch,fg='green',font=('Arial',25))
+two.pack(pady=25)
+three=Button(win,text='BOOK TICKETS',command=bookticket,fg='green',font=('Arial',25))
+three.pack(pady=25)
+four=Button(win,text='CHECK PNR STATUS',command=pnrstatus,fg='green',font=('Arial',25))
+four.pack(pady=25)
+five=Button(win,text='CANCEL BOOKING',command=cancelbkng,fg='green',font=('Arial',25))
+five.pack(pady=25)
+six=Button(win,text='EXIT',command=win.destroy,fg='red',font=('Arial',25))
+six.pack(pady=25)
+win.mainloop()
