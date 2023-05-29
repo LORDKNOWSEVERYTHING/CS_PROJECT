@@ -1,3 +1,4 @@
+# copy to new account, twice
 from mysql.connector import *
 from tkinter import *
 from random import *
